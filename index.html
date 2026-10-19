@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QC SOUL</title>
+<!-- Página de entrada de la webapp QC SOUL (19-10-2026). Existe SOLO para que, al «Agregar a inicio»,
+     el celular guarde el logo de Soul Fruits: la app real vive en Google Apps Script, dentro de una
+     página de Google, y ahí no se puede poner el ícono que usa el iPhone. Esta página no guarda datos:
+     toma la clave del link (?k=…) y abre la app con esa misma clave. -->
+<link rel="apple-touch-icon" href="icono-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icono-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icono-32.png">
+<meta name="apple-mobile-web-app-title" content="QC SOUL">
+<meta name="application-name" content="QC SOUL">
+<meta name="theme-color" content="#002303">
+<style>
+  :root { --verde:#002303; --oro:#f5c400; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+         background:var(--verde); color:#fff; font-family:system-ui, -apple-system, sans-serif; text-align:center; padding:24px; }
+  img { width:140px; height:140px; border-radius:28px; }
+  h1 { margin:16px 0 4px; font-size:24px; color:var(--oro); }
+  p { margin:6px 0; font-size:15px; opacity:.9; max-width:340px; }
+  a.boton { display:inline-block; margin-top:20px; padding:16px 28px; border-radius:12px; background:var(--oro); color:var(--verde);
+            font-weight:700; font-size:18px; text-decoration:none; }
+  .ayuda { margin-top:28px; font-size:13px; opacity:.75; }
+  .error { color:#ffb4b4; }
+</style>
+</head>
+<body>
+  <img src="icono-512.png" alt="Soul Fruits">
+  <h1>QC SOUL</h1>
+  <p id="estado">Inspección de calidad</p>
+  <a class="boton" id="abrir" href="#">Abrir QC SOUL</a>
+  <div class="ayuda" id="ayuda">
+    Para tenerla en la pantalla de inicio con este logo:<br>
+    <b>iPhone:</b> Compartir → «Agregar a inicio».<br>
+    <b>Android:</b> menú ⋮ → «Agregar a la pantalla principal».
+  </div>
+<script>
+  // URL de la app (implementación fija: los links no cambian entre versiones).
+  var APP = 'https://script.google.com/macros/s/AKfycbziniY4bUYqdprF9eJouPC-Th0IuQFiu2Xobds15p3p2VQYeq0Ho7RKZqQj0zbcNOGn0Q/exec';
+  var k = (new URLSearchParams(location.search).get('k') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+  var abrir = document.getElementById('abrir');
+  if (!k) {
+    document.getElementById('estado').innerHTML = '<span class="error">Este link no trae la clave. Pídele el tuyo a Gaspar.</span>';
+    abrir.style.display = 'none';
+  } else {
+    var destino = APP + '?k=' + encodeURIComponent(k);
+    abrir.href = destino;
+    // La 1ª vez se queda aquí para que se pueda «Agregar a inicio»; desde la 2ª (por ejemplo, al abrir
+    // el ícono del inicio) entra sola a la app.
+    var clave = 'qc_lanzador_visto_' + k, visto = false;
+    try { visto = localStorage.getItem(clave) === '1'; localStorage.setItem(clave, '1'); } catch (e) {}
+    var instalado = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+    if (visto || instalado) {
+      document.getElementById('estado').textContent = 'Abriendo…';
+      document.getElementById('ayuda').style.display = 'none';
+      setTimeout(function () { location.replace(destino); }, 600);
+    }
+  }
+</script>
+</body>
+</html>
