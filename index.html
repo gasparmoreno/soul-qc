@@ -41,17 +41,20 @@
 <script>
   // URL de la app (implementación fija: los links no cambian entre versiones).
   var APP = 'https://script.google.com/macros/s/AKfycbziniY4bUYqdprF9eJouPC-Th0IuQFiu2Xobds15p3p2VQYeq0Ho7RKZqQj0zbcNOGn0Q/exec';
-  var k = (new URLSearchParams(location.search).get('k') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+  var q = new URLSearchParams(location.search);
+  var k = (q.get('k') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
+  // Link de registro de una empresa (?inv=…): el inspector nuevo crea su perfil en la app (19-10).
+  var inv = (q.get('inv') || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 30);
   var abrir = document.getElementById('abrir');
-  if (!k) {
+  if (!k && !inv) {
     document.getElementById('estado').innerHTML = '<span class="error">Este link no trae la clave. Pídele el tuyo a Gaspar.</span>';
     abrir.style.display = 'none';
   } else {
-    var destino = APP + '?k=' + encodeURIComponent(k);
+    var destino = k ? APP + '?k=' + encodeURIComponent(k) : APP + '?inv=' + encodeURIComponent(inv);
     abrir.href = destino;
     // La 1ª vez se queda aquí para que se pueda «Agregar a inicio»; desde la 2ª (por ejemplo, al abrir
     // el ícono del inicio) entra sola a la app.
-    var clave = 'qc_lanzador_visto_' + k, visto = false;
+    var clave = 'qc_lanzador_visto_' + (k || 'inv' + inv), visto = false;
     try { visto = localStorage.getItem(clave) === '1'; localStorage.setItem(clave, '1'); } catch (e) {}
     var instalado = window.navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
     if (visto || instalado) {
